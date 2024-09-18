@@ -1,5 +1,5 @@
 from nonebot.plugin import PluginMetadata
-from nonebot_plugin_alconna import Alconna, Args, on_alconna
+from nonebot_plugin_alconna import Alconna, Match, Args, on_alconna
 
 from zhenxun.configs.utils import PluginExtraData
 from zhenxun.utils.message import MessageUtils
@@ -22,7 +22,7 @@ __plugin_meta__ = PluginMetadata(
     ).dict(),
 )
 
-_matcher = on_alconna(Alconna("新番", Args["text"]), priority=5, block=True)
+_matcher = on_alconna(Alconna("新番", Args["text?", str]), priority=5, block=True)
 
 def convert_weekday_to_number(weekday_str):
     weekdays_mapping = {
@@ -59,9 +59,10 @@ async def handle_new_anime(text: str):
     await MessageUtils.build_message(pic).send()
 
 @_matcher.handle()
-async def _(text: str):
-    if text:
-        await handle_new_anime(text)
+async def _(text: Match[str]):
+    if text.available:
+        weekday_str = text.result
+        await handle_new_anime(weekday_str)
     else:
         text = f"## 新番查询\n#### 查询番剧的每日放送和评分\n#### 使用方法：\n##### 新番 星期X（或新番 周X)\n###### 数据来源 bgm.tv"
         pic = await md_to_pic(md=text)
