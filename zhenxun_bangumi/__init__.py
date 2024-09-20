@@ -6,7 +6,7 @@ from zhenxun.utils.message import MessageUtils
 from nonebot_plugin_htmlrender import md_to_pic
 
 from datetime import datetime
-from .data_source import get_today
+from .data_source import get_today, get_all
 
 
 __plugin_meta__ = PluginMetadata(
@@ -17,6 +17,7 @@ __plugin_meta__ = PluginMetadata(
         新番 星期X
         新番 周X
         新番 今日/明日
+        新番 全部
     """.strip(),
     extra=PluginExtraData(
         author="meng-luo",
@@ -36,7 +37,8 @@ def convert_weekday_to_number(weekday_str):
         "周六": 5, "星期六": 5,
         "周日": 6, "星期日": 6,
         "今日": datetime.now().weekday(),
-        "明日": datetime.now().weekday() + 1
+        "明日": datetime.now().weekday() + 1,
+        "全部": "all"
     }
     return weekdays_mapping.get(weekday_str, -1)
 
@@ -46,6 +48,13 @@ async def handle_new_anime(weekday_str):
         await MessageUtils.build_message('请正确输入查询的日期').finish()
         return
 
+    if day_id == "all":
+        text = await get_all()
+        if text is None:
+            await MessageUtils.build_message('查询失败').finish()
+        pic = await md_to_pic(md=text)
+        await MessageUtils.build_message(pic).send()
+        return
     out = await get_today(day_id)
     if out is None:
         await MessageUtils.build_message('查询失败').finish()
@@ -65,7 +74,7 @@ async def _(text: Match[str]):
 ## 新番查询
 #### 查询番剧的每日放送和评分
 #### 使用方法：
-##### 新番 星期X（或新番 周X）
+##### 新番 星期X/周X/今日/明日/全部
 ###### 数据来源 bgm.tv
 """
         pic = await md_to_pic(md=usage_text)
