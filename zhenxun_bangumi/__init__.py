@@ -37,7 +37,7 @@ def convert_weekday_to_number(weekday_str):
         "周六": 5, "星期六": 5,
         "周日": 6, "星期日": 6,
         "今日": datetime.now().weekday(),
-        "明日": datetime.now().weekday() + 1,
+        "明日": 0 if datetime.now().weekday() == 6 else datetime.now().weekday() + 1,
         "全部": "all"
     }
     return weekdays_mapping.get(weekday_str, -1)
